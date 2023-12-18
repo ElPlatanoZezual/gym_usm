@@ -40,12 +40,12 @@ router.get('/asistencia',
 )
 
 
-router.get('/horariosfuncionarios',
+router.get('/horariosFuncionarios',
     [
         authMiddleware.superFuncionarioAccess
     ],
     (req, res) => {
-        res.status(200).render("horariosfuncionarios.html")
+        res.status(200).render("horariosFuncionarios.html")
     }
 );
 
