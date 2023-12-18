@@ -159,7 +159,7 @@ async function logout(req, res) {
         
         res.clearCookie("access");
 
-        return res.redirect(`${process.env.SITE_URL}/`);
+        return res.redirect(`/`);
 
     } catch (error) {
         console.log(error);
