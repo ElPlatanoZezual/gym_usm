@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>GYM USM - Registrarse</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        body {
+            color: #566787;
+            background: #f5f5f5;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 13px;
+        }
+
+        .register-container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">GYM USM</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                </ul>
+            </div>
+        </nav>
+    </header>
+</head>
+<body>
+    <div class="container">
+        <div class="register-container">
+            <h2 class="mb-4">Registrarse</h2>
+            <form action="http://localhost:8080/api/auth/signup" method="post" id="registerForm">
+                <div class="form-group">
+                    <label for="firstName">Nombre:</label>
+                    <input type="text" id="firstName" name="nombre" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Apellido:</label>
+                    <input type="text" id="lastName" name="apellido" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo:</label>
+                    <input type="email" id="email" name="correo" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="rut">Rut:</label>
+                    <input type="text" id="rut" name="rut" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="pdfFile">Adjuntar PDF:</label>
+                    <input type="file" id="pdfFile" name="pdf" accept=".pdf" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="carrera">Carrera:</label>
+                    <select id="carrera" name="carreraId" class="form-control" required>
+                        <option value="656d304478528e9e35f7dcae">Técnico Universitario en Informática</option>
+                        <option value="656d304578528e9e35f7dcb1">Ingeniería en Informática</option>
+                        <option value="656d304578528e9e35f7dcb3">Técnico Universitario en Construcción</option>
+                        <!-- Agrega más opciones según sea necesario -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+            </form>
+            <div class="login-link">
+                ¿Ya tienes una cuenta? <a href="/login" class="btn btn-link">Iniciar Sesión</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

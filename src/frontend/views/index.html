@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>GYM USM</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="css/style.css">
+    <script>
+        // Función para agregar elementos a la lista
+        function agregarElemento(texto, url) {
+            // Crear elementos li y a
+            var listItem = document.createElement('li');
+            var link = document.createElement('a');
+
+            // Configurar el enlace
+            link.textContent = texto;
+            link.setAttribute('href', url);
+            link.classList.add('nav-link');
+
+            // Configurar el elemento de lista
+            listItem.classList.add('nav-item');
+            listItem.appendChild(link);
+
+            // Agregar el elemento a la lista existente
+            var navbar = document.getElementById('navbarNav').querySelector("ul.navbar-nav.mr-auto");
+            navbar.appendChild(listItem);
+        }
+
+        fetch('/api/auth/getUserData', {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var navbar = document.getElementById('navbarNav').querySelector("ul.navbar-nav.ml-auto.mr-5 a.nav-link");
+                navbar.setAttribute('href', '/api/auth/logout');
+                navbar.textContent = "Cerrar Sesión";
+
+                if (data.data.role === "alumno") {
+                    agregarElemento('Reservar Hora', '/reserva');
+                } else if (data.data.role === "normal") {
+                    agregarElemento('Marcar Asistencia', '/asistencia');
+                } else if (data.data.role === "super") {
+                    agregarElemento('Horario Funcionarios', '/horariosFuncionarios');
+                    agregarElemento('Administrar Funcionarios', '/funcionarios');
+                    agregarElemento('Administrar Estudiantes', '/estudiantes');
+                    agregarElemento('Administrar Casilleros', '/casilleros');
+                }
+            }
+        })
+    </script>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">GYM USM</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+					<!-- <li class="nav-item active">
+						<a class="nav-link" href="/funcionarios">Administrar Funcionarios</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/estudiantes">Administrar Estudiantes</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/horariosFuncionarios">Horario Funcionarios</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/casilleros">Administrar Casilleros</a>
+					</li> -->
+				</ul>
+                <ul class="navbar-nav ml-auto mr-5">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Iniciar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+</head>
+<body>
+    
+
+    
+
+    
+</body>
+</html>

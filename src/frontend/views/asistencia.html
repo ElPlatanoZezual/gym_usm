@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>GYM USM - Marcar Asistencia</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="css/style.css">
+    <style>
+        .schedule-table {
+            margin-top: 20px;
+        }
+
+        .schedule-table th, .schedule-table td {
+            text-align: center;
+            position: relative;
+        }
+
+        .add-person-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .schedule-table td:hover .add-person-btn {
+            display: block;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            var scheduleData = [
+                ["9:35 - 10:45", null],
+                ["10:55 - 12:05", null],
+                ["12:15 - 13:25", null],
+                ["14:30 - 15:40", null],
+                ["15:50 - 17:00", null],
+                ["17:10 - 18:20", null],
+                ["18:30 - 19:40", null]
+            ];
+            
+            fetch('/api/bloque/getBloquesFromFuncionario', {
+                method: 'GET', // Adjust the method as needed (GET, POST, etc.)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        
+                        scheduleData = data.data;
+
+                        // Initialize the schedule table
+                        updateScheduleTable();
+
+                    } else {
+                        console.error('Get Reservas failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('There was an error getting Reservas:', error);
+                });
+
+
+            // Function to update the schedule table
+            function updateScheduleTable() {
+                var tableBody = $("#scheduleTableBody");
+                tableBody.empty();
+
+                for (var i = 0; i < scheduleData.length; i++) {
+                    var row = $("<tr>");
+                    for (var j = 0; j < scheduleData[i].length; j++) {
+                        var cell = $("<td>").html(scheduleData[i][j]);
+                        if (j === 1 && scheduleData[i][j] !== "No disponible") {
+                            // If cell is empty, add an "Add" button
+                            var addButton = $("<button>").addClass("btn btn-primary add-person-btn").text("Editar");
+                            addButton.click({ row: i, column: j }, openPersonModal);
+                            cell.append(addButton);
+                        }
+                        row.append(cell);
+                    }
+                    tableBody.append(row);
+                }
+            }
+
+            // Function to open the person selection modal
+            function openPersonModal(event) {
+                var row = event.data.row;
+                var column = event.data.column;
+
+                fetch(`/api/reserva/fromBloque?horarioAsignado=${scheduleData[row][0]}`, {
+                    method: 'GET'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            $("#personModal").modal('show');
+
+                            var personModalBody = document.getElementById("personModalBody");
+                            let textHtml = "";
+
+                            for (const r of data.data) {
+                                textHtml += `
+                                    <div class="student-info">
+                                        <div>
+                                            <h5>${r.nombreEstudiante}</h5>
+                                            <p>${r.rutEstudiante}</p>
+                                            <p>${r.correoEstudiante}</p>
+                                        </div>
+                                        <div id="${r.id}_buttons" style="display:${r.asistencia === undefined ? 'block' : 'none'};" class="text-center mt-2 mb-2">
+                                            <button id="${r.id}_asistencia"type="button" class="btn btn-success confirm-btn">Confirmar Asistencia</button>
+                                            <button id="${r.id}_inasistencia" type="button" class="btn btn-danger absent-btn">Marcar Inasistencia</button>
+                                        </div>
+                                        <div id="${r.id}_notification" style="display:${r.asistencia === undefined ? 'none' : 'block'};" class="text-center mt-2 mb-2">
+                                            <p style="color:${r.asistencia ? 'green' : 'red'};">Se ha confirmado ${r.asistencia ? 'asistencia' : 'inasistencia'}</p>
+                                            <button id="${r.id}_edit" type="button" class="btn btn-warning absent-btn">Editar</button>
+                                        </div>
+                                    </div>
+                                `
+                            }
+                    
+                            personModalBody.innerHTML = textHtml;
+
+                            for (const r of data.data) {
+                                document.getElementById(`${r.id}_asistencia`).addEventListener('click', function () {
+                                    fetch(`/api/reserva/${r.id}`, {
+                                        method: 'PATCH',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            asistencia: true,
+                                            previous: r.asistencia
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            document.getElementById(`${r.id}_buttons`).style.display = "none";
+                                            document.getElementById(`${r.id}_notification`).style.display = "block";
+
+                                            document.getElementById(`${r.id}_notification`).querySelector("p").innerHTML = `
+                                                <p style="color:green;">Se ha confirmado asistencia</p>
+                                            `;
+
+                                            r.asistencia = true;
+                                        }
+                                    })
+                                });
+
+                                document.getElementById(`${r.id}_inasistencia`).addEventListener('click', function () {
+                                    fetch(`/api/reserva/${r.id}`, {
+                                        method: 'PATCH',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            asistencia: false,
+                                            previous: r.asistencia
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            document.getElementById(`${r.id}_buttons`).style.display = "none";
+                                            document.getElementById(`${r.id}_notification`).style.display = "block";
+
+                                            document.getElementById(`${r.id}_notification`).querySelector("p").innerHTML = `
+                                                <p style="color:red;">Se ha confirmado inasistencia</p>
+                                            `;
+
+                                            r.asistencia = false;
+                                        }
+                                    })
+                                });
+
+                                document.getElementById(`${r.id}_edit`).addEventListener('click', function () {
+                                    document.getElementById(`${r.id}_buttons`).style.display = "block";
+                                    document.getElementById(`${r.id}_notification`).style.display = "none";
+                                });
+                            }
+                        } else {
+                            console.error('Get Reservas failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was an error getting Reservas:', error);
+                    });
+            }
+
+
+            //
+
+            const today = new Date();
+            const dateStr = today.toLocaleString("es").split(", ")[0];
+
+            let horarioAsignado;
+            let casilleroId;
+
+            document.getElementById('following_day').textContent = `Fecha actual: ${dateStr}`;
+
+
+            //
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Get the form element
+                var form = document.getElementById('cancelModal');
+
+                // Listen for the form submission event
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent the default form submission behavior
+
+                    // Here, you can add code to handle the form submission, like an AJAX request
+
+                    // Simulating a delay before reloading the page (Replace this with your actual code)
+                    setTimeout(function() {
+                        // Reload the page after a delay (e.g., 3 seconds)
+                        window.location.reload();
+                    }, 3000); // Change the time delay as needed (in milliseconds)
+                });
+
+                var form2 = document.getElementById('personModal');
+
+                // Listen for the form submission event
+                form2.addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent the default form submission behavior
+
+                    // Here, you can add code to handle the form submission, like an AJAX request
+
+                    // Simulating a delay before reloading the page (Replace this with your actual code)
+                    setTimeout(function() {
+                        // Reload the page after a delay (e.g., 3 seconds)
+                        window.location.reload();
+                    }, 3000); // Change the time delay as needed (in milliseconds)
+                });
+            });
+        });
+    </script>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">GYM USM</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/asistencia">Marcar Asistencia</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto mr-5">
+                    <li class="nav-item">
+                        <a id="logout" class="nav-link" href="/api/auth/logout">Cerrar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+</head>
+<body>
+    <div class="container">
+        <h2>Tabla de Horarios</h2>
+        <table class="table table-bordered schedule-table">
+            <thead>
+                <tr>
+                    <th>Bloques</th>
+                    <th id="following_day">Dia siguiente</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleTableBody">
+                <!-- Table data will be dynamically inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Person Selection Modal -->
+        <div class="modal" id="personModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Marcar Asistencia</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body" id="personModalBody">
+                    </div>
+                    
+
+                </div>
+            </div>
+        </div>
+
+        <div id="cancelModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form>
+                        <div class="modal-header">						
+                            <h4 class="modal-title">Cancelar reserva</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        </div>
+                        <div class="modal-body">					
+                            <p>¿Estás seguro de que quieres cancelar tu reserva?</p>
+                            <p class="text-warning"><small>Esta acción puede retractarse, pero es posible que te quedes sin cupo.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" data-dismiss="modal" value="Atrás">
+                            <input type="submit" class="btn btn-danger" value="Cancelar">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
