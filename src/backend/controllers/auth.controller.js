@@ -13,7 +13,6 @@ async function login(req, res) {
     try {
         const { rut, password } = req.body;
 
-
         // Intentar loggeo Funcionario
 
         const funcionario = await Funcionario.findOne({ rut: rut });
@@ -32,7 +31,9 @@ async function login(req, res) {
                         secure: true
                     });
 
-                    return res.status(200).redirect("/");
+                    return res.status(200).json({
+                        success: true
+                    });
                 } else {
                     const token = jwt.sign({ id: funcionario._id }, process.env.JWT_API_SECRET);
                     
@@ -41,7 +42,9 @@ async function login(req, res) {
                         secure: true
                     });
 
-                    return res.status(200).redirect("/");
+                    return res.status(200).json({
+                        success: true
+                    });
                 }
             }
         }
@@ -64,7 +67,9 @@ async function login(req, res) {
                     secure: true
                 });
 
-                return res.status(200).redirect("/");
+                return res.status(200).json({
+                    success: true
+                });
             }
         }
 
@@ -133,7 +138,9 @@ async function signup(req, res) {
         });
 
 
-        return res.status(200).redirect("/");
+        return res.status(200).json({
+            success: true
+        });
 
     } catch (error) {
         console.log(error);
